@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tenant Role Catalogue</title>
+  <script>
+    (() => {
+      const theme = hasDarkModeFlag() ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", theme);
+
+      function hasDarkModeFlag() {
+        return getUrlCandidates().some(urlHasDarkModeFlag);
+      }
+
+      function getUrlCandidates() {
+        const urls = [window.location.href, document.referrer];
+        try { urls.push(window.parent.location.href); } catch (error) { }
+        try { urls.push(window.top.location.href); } catch (error) { }
+        return urls.filter(Boolean);
+      }
+
+      function urlHasDarkModeFlag(url) {
+        const text = normalizeUrlText(url);
+        return text.includes("themeoption=darkmode") || text.includes("themeoption%3ddarkmode");
+      }
+
+      function normalizeUrlText(value) {
+        let text = String(value || "").toLowerCase();
+        for (let index = 0; index < 3; index += 1) {
+          try {
+            const decoded = decodeURIComponent(text);
+            if (decoded === text) break;
+            text = decoded;
+          } catch (error) {
+            break;
+          }
+        }
+        return text;
+      }
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f4ef;
+      --surface: #ffffff;
+      --surface-soft: #f5f5f5;
+      --border: #dedede;
+      --border-strong: #919191;
+      --text: #242424;
+      --muted: #5c5c5c;
+      --accent: #b11f4b;
+      --accent-hover: #9a1a41;
+      --accent-soft: rgba(177, 31, 75, 0.08);
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #b45309;
+      --link: #0078d4;
+      --shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #111111;
+      --surface: #1f1f1f;
+      --surface-soft: #2b2b2b;
+      --border: #3d3d3d;
+      --border-strong: #666666;
+      --text: #f3f2f1;
+      --muted: #c8c6c4;
+      --accent: #ff8bb3;
+      --accent-hover: #ffabc9;
+      --accent-soft: rgba(255, 139, 179, 0.14);
+      --success: #4ade80;
+      --danger: #f87171;
+      --warning: #fbbf24;
+      --link: #69afe5;
+      --shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: "Segoe UI", system-ui, sans-serif; }
+    main { max-width: 1420px; margin: 0 auto; padding: 28px; }
+    h1, h2, h3 { margin: 0; }
+    h1 { font-size: 30px; }
+    h2 { font-size: 20px; }
+    h3 { font-size: 16px; }
+    p { color: var(--muted); line-height: 1.45; }
+    .hero, .card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); padding: 22px; margin-bottom: 18px; }
+    .hero { display: grid; gap: 10px; }
+    .subtitle { color: var(--muted); max-width: 980px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .stat { background: var(--surface-soft); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
+    .stat-value { font-size: 24px; font-weight: 700; }
+    .stat-label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .toolbar, .form-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+    .field { display: grid; gap: 5px; min-width: 220px; flex: 1; }
+    label { font-size: 13px; font-weight: 600; }
+    input, select, textarea, button { font: inherit; }
+    input, select, textarea { width: 100%; border: 1px solid var(--border-strong); border-radius: 10px; color: var(--text); background: var(--surface); padding: 10px 12px; }
+    textarea { min-height: 126px; resize: vertical; }
+    .button { border: none; border-radius: 10px; background: var(--accent); color: #fff; cursor: pointer; font-weight: 700; padding: 11px 16px; }
+    .button:hover:not(:disabled) { background: var(--accent-hover); }
+    .button.secondary { background: var(--surface-soft); color: var(--text); border: 1px solid var(--border-strong); }
+    .button:disabled { cursor: not-allowed; opacity: 0.55; }
+    .message { border-radius: 12px; margin-top: 14px; padding: 12px 14px; border: 1px solid var(--border); background: var(--surface-soft); color: var(--muted); }
+    .message.success { border-color: var(--success); color: var(--success); }
+    .message.error { border-color: var(--danger); color: var(--danger); }
+    .message.warning { border-color: var(--warning); color: var(--warning); }
+    .table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: 14px; }
+    table { border-collapse: collapse; min-width: 1120px; width: 100%; }
+    th, td { border-bottom: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+    th { background: var(--surface-soft); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; position: sticky; top: 0; }
+    tr:last-child td { border-bottom: none; }
+    .pill { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; background: var(--accent-soft); padding: 3px 8px; font-size: 12px; }
+    .failures { display: grid; gap: 8px; margin-top: 10px; }
+    .failure { border-left: 4px solid var(--warning); background: var(--surface-soft); border-radius: 10px; padding: 10px; }
+    .hint { font-size: 12px; color: var(--muted); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    @media (max-width: 900px) { main { padding: 14px; } .grid, .stats { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <h1>Tenant Role Catalogue</h1>
+      <div class="subtitle">Catalogue Dataverse security roles from the current environment or from a Power Automate admin collector export. Tenant-level writes are prepared as explicit request JSON for a reviewed automation flow.</div>
+      <div class="message" id="message" role="status">Ready. Load the current environment or import a tenant role catalogue JSON file.</div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Current environment</h2>
+        <p>Loads roles visible to the signed-in user in this Dataverse environment through <code>Xrm.WebApi</code>.</p>
+        <div class="toolbar">
+          <button id="loadCurrentButton" class="button" type="button">Load current environment roles</button>
+        </div>
+        <div class="hint" id="currentEnvHint"></div>
+      </div>
+
+      <div class="card">
+        <h2>Power Automate collector JSON</h2>
+        <p>Import a tenant export generated by an admin flow. The parser accepts V2 connector output, legacy connector output, and manual fallback environment arrays.</p>
+        <div class="form-row">
+          <div class="field">
+            <label for="catalogueFile">Catalogue JSON file</label>
+            <input id="catalogueFile" type="file" accept="application/json,.json">
+          </div>
+          <button id="importButton" class="button" type="button">Import JSON</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Summary</h2>
+      <div class="stats">
+        <div class="stat"><div class="stat-value" id="environmentCount">0</div><div class="stat-label">Environments</div></div>
+        <div class="stat"><div class="stat-value" id="roleCount">0</div><div class="stat-label">Roles</div></div>
+        <div class="stat"><div class="stat-value" id="managedCount">0</div><div class="stat-label">Managed roles</div></div>
+        <div class="stat"><div class="stat-value" id="failureCount">0</div><div class="stat-label">Warnings/failures</div></div>
+      </div>
+      <div id="failureList" class="failures"></div>
+    </section>
+
+    <section class="card">
+      <h2>Role inventory</h2>
+      <div class="toolbar">
+        <div class="field">
+          <label for="searchBox">Search</label>
+          <input id="searchBox" type="search" placeholder="Role, business unit, environment, source">
+        </div>
+        <div class="field">
+          <label for="environmentFilter">Environment</label>
+          <select id="environmentFilter"><option value="">All environments</option></select>
+        </div>
+        <div class="field">
+          <label for="managedFilter">Managed state</label>
+          <select id="managedFilter">
+            <option value="">All roles</option>
+            <option value="true">Managed only</option>
+            <option value="false">Unmanaged/custom only</option>
+          </select>
+        </div>
+        <button id="exportJsonButton" class="button secondary" type="button" disabled>Export JSON</button>
+        <button id="exportCsvButton" class="button secondary" type="button" disabled>Export CSV</button>
+      </div>
+      <div class="table-wrap" style="margin-top: 14px;">
+        <table aria-describedby="inventoryCaption">
+          <caption id="inventoryCaption" class="sr-only">Tenant role catalogue rows</caption>
+          <thead>
+            <tr>
+              <th>Environment</th>
+              <th>Role</th>
+              <th>Business unit</th>
+              <th>Managed</th>
+              <th>Privileges</th>
+              <th>Source</th>
+              <th>Role ID</th>
+            </tr>
+          </thead>
+          <tbody id="roleRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Role create request</h2>
+      <p>Generate a reviewed request file for a Power Automate flow. The HTML tool does not silently create roles across tenant environments.</p>
+      <div class="form-row">
+        <div class="field">
+          <label for="newRoleName">New role name</label>
+          <input id="newRoleName" type="text" placeholder="Security role name">
+        </div>
+        <div class="field">
+          <label for="sourceRoleName">Optional source role to clone</label>
+          <input id="sourceRoleName" type="text" placeholder="Existing role name">
+        </div>
+        <div class="field">
+          <label for="targetEnvironments">Target environments</label>
+          <select id="targetEnvironments" multiple size="4"></select>
+          <span class="hint">Leave empty to target all loaded environments.</span>
+        </div>
+        <button id="generateRequestButton" class="button" type="button" disabled>Generate request JSON</button>
+      </div>
+      <textarea id="requestOutput" readonly aria-label="Generated role create request JSON"></textarea>
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      rows: [],
+      failures: [],
+      environments: new Map(),
+      xrm: getXrm()
+    };
+
+    const elements = {
+      message: document.getElementById("message"),
+      loadCurrentButton: document.getElementById("loadCurrentButton"),
+      currentEnvHint: document.getElementById("currentEnvHint"),
+      catalogueFile: document.getElementById("catalogueFile"),
+      importButton: document.getElementById("importButton"),
+      environmentCount: document.getElementById("environmentCount"),
+      roleCount: document.getElementById("roleCount"),
+      managedCount: document.getElementById("managedCount"),
+      failureCount: document.getElementById("failureCount"),
+      failureList: document.getElementById("failureList"),
+      searchBox: document.getElementById("searchBox"),
+      environmentFilter: document.getElementById("environmentFilter"),
+      managedFilter: document.getElementById("managedFilter"),
+      exportJsonButton: document.getElementById("exportJsonButton"),
+      exportCsvButton: document.getElementById("exportCsvButton"),
+      roleRows: document.getElementById("roleRows"),
+      newRoleName: document.getElementById("newRoleName"),
+      sourceRoleName: document.getElementById("sourceRoleName"),
+      targetEnvironments: document.getElementById("targetEnvironments"),
+      generateRequestButton: document.getElementById("generateRequestButton"),
+      requestOutput: document.getElementById("requestOutput")
+    };
+
+    elements.loadCurrentButton.addEventListener("click", loadCurrentEnvironment);
+    elements.importButton.addEventListener("click", importCatalogueFile);
+    elements.searchBox.addEventListener("input", render);
+    elements.environmentFilter.addEventListener("change", render);
+    elements.managedFilter.addEventListener("change", render);
+    elements.exportJsonButton.addEventListener("click", () => downloadText("tenant-role-catalogue.json", JSON.stringify(toExportObject(), null, 2), "application/json"));
+    elements.exportCsvButton.addEventListener("click", () => downloadText("tenant-role-catalogue.csv", toCsv(filteredRows()), "text/csv"));
+    elements.generateRequestButton.addEventListener("click", generateCreateRequest);
+
+    initialize();
+
+    function initialize() {
+      const context = getGlobalContext();
+      const orgUrl = context && context.getClientUrl ? context.getClientUrl() : "";
+      elements.currentEnvHint.textContent = orgUrl ? `Detected Dataverse URL: ${orgUrl}` : "Open as a Dataverse web resource to use current-environment loading.";
+      elements.loadCurrentButton.disabled = !state.xrm || !state.xrm.WebApi;
+      render();
+    }
+
+    async function loadCurrentEnvironment() {
+      try {
+        setMessage("Loading current environment roles...", "");
+        const context = getGlobalContext();
+        const orgUrl = context && context.getClientUrl ? context.getClientUrl() : "";
+        const orgName = context && context.getOrgUniqueName ? context.getOrgUniqueName() : "Current environment";
+        const records = await retrieveAllRecords("role", "?$select=name,roleid,_businessunitid_value&$orderby=name asc");
+        const environment = normalizeEnvironment({ displayName: orgName, environmentUrl: orgUrl, source: "Current Dataverse environment" });
+        const rows = records.map((record) => normalizeRole(record, environment, "Current Dataverse environment"));
+        replaceSourceRows("Current Dataverse environment", rows, [environment], []);
+        setMessage(`Loaded ${rows.length} roles from ${environment.displayName}.`, "success");
+      } catch (error) {
+        setMessage(`Could not load current environment roles. ${getErrorMessage(error)}`, "error");
+      }
+    }
+
+    async function importCatalogueFile() {
+      try {
+        const file = elements.catalogueFile.files && elements.catalogueFile.files[0];
+        if (!file) throw new Error("Choose a JSON file first.");
+        const parsed = JSON.parse(await file.text());
+        const normalized = normalizeCatalogue(parsed, file.name);
+        replaceSourceRows(file.name, normalized.rows, normalized.environments, normalized.failures);
+        setMessage(`Imported ${normalized.rows.length} role rows from ${file.name}.`, normalized.failures.length ? "warning" : "success");
+      } catch (error) {
+        setMessage(`Could not import catalogue JSON. ${getErrorMessage(error)}`, "error");
+      }
+    }
+
+    function replaceSourceRows(sourceName, rows, environments, failures) {
+      state.rows = state.rows.filter((row) => row.sourceName !== sourceName);
+      state.failures = state.failures.filter((failure) => failure.sourceName !== sourceName);
+      rows.forEach((row) => state.rows.push(row));
+      failures.forEach((failure) => state.failures.push({ ...failure, sourceName }));
+      environments.forEach((environment) => setEnvironment(environment));
+      rows.forEach((row) => setEnvironment(row.environment));
+      rebuildEnvironmentOptions();
+      render();
+    }
+
+    function normalizeCatalogue(input, sourceName) {
+      const rows = [];
+      const environments = [];
+      const failures = extractFailures(input, sourceName);
+      const environmentRecords = findArray(input, ["environments", "Environments", "value", "EnvironmentList", "adminEnvironments"]);
+      const flatRoleRecords = findArray(input, ["roles", "Roles", "TenantRoles", "TenantRoleCatalogue", "RoleCatalogue", "items", "value"]);
+
+      if (environmentRecords.length && looksLikeEnvironments(environmentRecords)) {
+        environmentRecords.forEach((item) => {
+          const environment = normalizeEnvironment(item, sourceName);
+          environments.push(environment);
+          const roleRecords = findArray(item, ["roles", "Roles", "SecurityRoles", "RoleCatalogue", "items", "value"]);
+          roleRecords.forEach((role) => rows.push(normalizeRole(role, environment, sourceName)));
+          if (!roleRecords.length && hasFailureSignal(item)) failures.push(toFailure(item, environment, sourceName));
+        });
+      } else if (Array.isArray(input)) {
+        input.forEach((item) => rows.push(normalizeRole(item, normalizeEnvironment(item, sourceName), sourceName)));
+      } else if (flatRoleRecords.length) {
+        flatRoleRecords.forEach((item) => rows.push(normalizeRole(item, normalizeEnvironment(item, sourceName), sourceName)));
+      }
+
+      if (!rows.length && !failures.length) {
+        failures.push({ environmentName: "Unknown", message: "No role rows were found. Export roles as an array or as environments[].roles[].", sourceName });
+      }
+
+      return { rows, environments, failures };
+    }
+
+    function normalizeEnvironment(item, sourceName) {
+      const displayName = firstScalar(item, ["displayName", "DisplayName", "environmentDisplayName", "EnvironmentDisplayName", "properties.displayName", "name", "Name"]);
+      const environmentName = firstScalar(item, ["environmentName", "EnvironmentName", "name", "Name", "properties.environmentSku", "properties.linkedEnvironmentMetadata.uniqueName"]);
+      const environmentId = cleanGuid(firstScalar(item, ["environmentId", "EnvironmentId", "id", "Id", "properties.azureRegionHint"]));
+      const environmentUrl = firstScalar(item, ["environmentUrl", "EnvironmentUrl", "dataverseUrl", "DataverseUrl", "organizationUrl", "OrganizationUrl", "properties.linkedEnvironmentMetadata.instanceUrl", "properties.runtimeEndpoints.maker"]);
+      const key = environmentId || environmentName || environmentUrl || displayName || sourceName;
+      return { key: String(key), displayName: String(displayName || environmentName || environmentUrl || "Unknown environment"), environmentName: String(environmentName || ""), environmentId: environmentId || "", environmentUrl: String(environmentUrl || ""), sourceName };
+    }
+
+    function normalizeRole(item, environment, sourceName) {
+      const roleName = firstScalar(item, ["roleName", "RoleName", "name", "Name", "securityRoleName", "SecurityRoleName"]);
+      const roleId = cleanGuid(firstScalar(item, ["roleId", "RoleId", "roleid", "RoleIdValue", "id", "Id"]));
+      const businessUnitName = firstScalar(item, ["businessUnitName", "BusinessUnitName", "businessUnit", "BusinessUnit", "_businessunitid_value@OData.Community.Display.V1.FormattedValue"]);
+      const businessUnitId = cleanGuid(firstScalar(item, ["businessUnitId", "BusinessUnitId", "_businessunitid_value"]));
+      const isManaged = toBoolean(firstScalar(item, ["isManaged", "IsManaged", "ismanaged", "Managed"]));
+      const privilegeCount = firstScalar(item, ["privilegeCount", "PrivilegeCount", "rolePrivilegeCount", "RolePrivilegeCount", "privileges.length", "Privileges.length"]);
+      return {
+        environment,
+        environmentKey: environment.key,
+        roleName: String(roleName || "Unnamed role"),
+        roleId: roleId || "",
+        businessUnitName: String(businessUnitName || businessUnitId || ""),
+        businessUnitId: businessUnitId || "",
+        isManaged,
+        privilegeCount: privilegeCount === undefined || privilegeCount === null || privilegeCount === "" ? "" : Number(privilegeCount),
+        sourceName
+      };
+    }
+
+    function extractFailures(input, sourceName) {
+      const failureRecords = [
+        ...findArray(input, ["failures", "Failures", "errors", "Errors", "SkippedEnvironments", "skippedEnvironments"]),
+        ...findArray(input, ["EnvironmentFallbacks", "environmentFallbacks", "fallbacks", "Fallbacks"])
+      ];
+      return failureRecords.map((item) => toFailure(item, normalizeEnvironment(item, sourceName), sourceName));
+    }
+
+    function toFailure(item, environment, sourceName) {
+      const message = firstScalar(item, ["message", "Message", "error", "Error", "status", "Status", "reason", "Reason"]);
+      const mode = firstScalar(item, ["mode", "Mode", "fallbackMode", "FallbackMode", "connectorAction", "ConnectorAction"]);
+      return { environmentName: environment.displayName, message: String(message || "Environment did not return role data."), mode: String(mode || ""), sourceName };
+    }
+
+    function looksLikeEnvironments(records) {
+      return records.some((item) => firstScalar(item, ["environmentName", "EnvironmentName", "environmentId", "EnvironmentId", "properties.linkedEnvironmentMetadata.instanceUrl"]));
+    }
+
+    function hasFailureSignal(item) {
+      return Boolean(firstScalar(item, ["error", "Error", "message", "Message", "status", "Status"]));
+    }
+
+    function render() {
+      const visibleRows = filteredRows();
+      elements.environmentCount.textContent = String(new Set(state.rows.map((row) => row.environmentKey)).size);
+      elements.roleCount.textContent = String(state.rows.length);
+      elements.managedCount.textContent = String(state.rows.filter((row) => row.isManaged === true).length);
+      elements.failureCount.textContent = String(state.failures.length);
+      elements.exportJsonButton.disabled = !state.rows.length;
+      elements.exportCsvButton.disabled = !state.rows.length;
+      elements.generateRequestButton.disabled = !state.environments.size;
+      renderFailures();
+      renderRows(visibleRows);
+    }
+
+    function renderFailures() {
+      elements.failureList.replaceChildren();
+      state.failures.slice(0, 20).forEach((failure) => {
+        const item = document.createElement("div");
+        item.className = "failure";
+        const title = document.createElement("strong");
+        title.textContent = failure.environmentName || "Unknown environment";
+        const text = document.createElement("div");
+        text.textContent = [failure.message, failure.mode].filter(Boolean).join(" ");
+        item.append(title, text);
+        elements.failureList.appendChild(item);
+      });
+    }
+
+    function renderRows(rows) {
+      elements.roleRows.replaceChildren();
+      if (!rows.length) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 7;
+        td.textContent = state.rows.length ? "No roles match the current filters." : "No roles loaded yet.";
+        tr.appendChild(td);
+        elements.roleRows.appendChild(tr);
+        return;
+      }
+
+      rows.slice(0, 1000).forEach((row) => {
+        const tr = document.createElement("tr");
+        appendCell(tr, row.environment.displayName);
+        appendCell(tr, row.roleName);
+        appendCell(tr, row.businessUnitName);
+        appendCell(tr, row.isManaged === null ? "Unknown" : row.isManaged ? "Yes" : "No");
+        appendCell(tr, row.privilegeCount === "" || Number.isNaN(row.privilegeCount) ? "" : String(row.privilegeCount));
+        appendCell(tr, row.sourceName);
+        appendCell(tr, row.roleId);
+        elements.roleRows.appendChild(tr);
+      });
+    }
+
+    function appendCell(row, value) {
+      const td = document.createElement("td");
+      td.textContent = value || "";
+      row.appendChild(td);
+    }
+
+    function filteredRows() {
+      const query = elements.searchBox.value.trim().toLowerCase();
+      const environment = elements.environmentFilter.value;
+      const managed = elements.managedFilter.value;
+      return state.rows.filter((row) => {
+        if (environment && row.environmentKey !== environment) return false;
+        if (managed && String(row.isManaged) !== managed) return false;
+        if (!query) return true;
+        return [row.roleName, row.businessUnitName, row.environment.displayName, row.environment.environmentName, row.sourceName, row.roleId].some((value) => String(value || "").toLowerCase().includes(query));
+      });
+    }
+
+    function rebuildEnvironmentOptions() {
+      const options = Array.from(state.environments.values()).sort((a, b) => a.displayName.localeCompare(b.displayName));
+      elements.environmentFilter.replaceChildren(new Option("All environments", ""));
+      elements.targetEnvironments.replaceChildren();
+      options.forEach((environment) => {
+        elements.environmentFilter.appendChild(new Option(environment.displayName, environment.key));
+        elements.targetEnvironments.appendChild(new Option(environment.displayName, environment.key));
+      });
+    }
+
+    function setEnvironment(environment) {
+      if (environment && environment.key) state.environments.set(environment.key, environment);
+    }
+
+    function generateCreateRequest() {
+      const roleName = elements.newRoleName.value.trim();
+      if (!roleName) {
+        setMessage("Enter a new role name before generating a request.", "warning");
+        return;
+      }
+      const selected = Array.from(elements.targetEnvironments.selectedOptions).map((option) => option.value);
+      const targetKeys = selected.length ? selected : Array.from(state.environments.keys());
+      const targets = targetKeys.map((key) => state.environments.get(key)).filter(Boolean).map((environment) => ({
+        environmentName: environment.environmentName,
+        environmentId: environment.environmentId,
+        environmentDisplayName: environment.displayName,
+        environmentUrl: environment.environmentUrl
+      }));
+      const request = {
+        schema: "DataverseHtmlTools.TenantRoleCatalogue.CreateRoles.v1",
+        requestedAt: new Date().toISOString(),
+        roleName,
+        sourceRoleName: elements.sourceRoleName.value.trim(),
+        options: { copySourcePrivilegesWhenFound: Boolean(elements.sourceRoleName.value.trim()), createEmptyRoleWhenSourceMissing: false },
+        targets
+      };
+      elements.requestOutput.value = JSON.stringify(request, null, 2);
+      setMessage(`Generated role-create request for ${targets.length} environment(s). Review it before running automation.`, "success");
+    }
+
+    async function retrieveAllRecords(entityName, query) {
+      const records = [];
+      let result = await state.xrm.WebApi.retrieveMultipleRecords(entityName, query);
+      records.push(...(result.entities || []));
+      while (result.nextLink) {
+        const nextQuery = result.nextLink.slice(result.nextLink.indexOf("?"));
+        result = await state.xrm.WebApi.retrieveMultipleRecords(entityName, nextQuery);
+        records.push(...(result.entities || []));
+      }
+      return records;
+    }
+
+    function toExportObject() {
+      return {
+        schema: "DataverseHtmlTools.TenantRoleCatalogue.v1",
+        exportedAt: new Date().toISOString(),
+        roles: filteredRows().map((row) => ({
+          environmentDisplayName: row.environment.displayName,
+          environmentName: row.environment.environmentName,
+          environmentId: row.environment.environmentId,
+          environmentUrl: row.environment.environmentUrl,
+          roleName: row.roleName,
+          roleId: row.roleId,
+          businessUnitName: row.businessUnitName,
+          businessUnitId: row.businessUnitId,
+          isManaged: row.isManaged,
+          privilegeCount: row.privilegeCount,
+          sourceName: row.sourceName
+        })),
+        failures: state.failures
+      };
+    }
+
+    function toCsv(rows) {
+      const headers = ["Environment", "Environment Name", "Environment ID", "Environment URL", "Role", "Role ID", "Business Unit", "Managed", "Privilege Count", "Source"];
+      const lines = [headers.map(csvEscape).join(",")];
+      rows.forEach((row) => {
+        lines.push([
+          row.environment.displayName,
+          row.environment.environmentName,
+          row.environment.environmentId,
+          row.environment.environmentUrl,
+          row.roleName,
+          row.roleId,
+          row.businessUnitName,
+          row.isManaged === null ? "" : String(row.isManaged),
+          row.privilegeCount,
+          row.sourceName
+        ].map(csvEscape).join(","));
+      });
+      return lines.join("\n");
+    }
+
+    function csvEscape(value) {
+      const text = String(value === undefined || value === null ? "" : value);
+      return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    }
+
+    function downloadText(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function findArray(input, paths) {
+      for (const path of paths) {
+        const value = getPath(input, path);
+        if (Array.isArray(value)) return value;
+      }
+      return [];
+    }
+
+    function firstScalar(input, paths) {
+      for (const path of paths) {
+        const value = getPath(input, path);
+        if (path.endsWith(".length") && Array.isArray(getPath(input, path.slice(0, -7)))) return getPath(input, path.slice(0, -7)).length;
+        if (value !== undefined && value !== null && typeof value !== "object") return value;
+      }
+      return "";
+    }
+
+    function getPath(input, path) {
+      if (!input || !path) return undefined;
+      if (Object.prototype.hasOwnProperty.call(input, path)) return input[path];
+      return path.split(".").reduce((value, part) => {
+        if (!value) return undefined;
+        if (Object.prototype.hasOwnProperty.call(value, part)) return value[part];
+        return undefined;
+      }, input);
+    }
+
+    function toBoolean(value) {
+      if (value === true || value === false) return value;
+      if (value === "true" || value === "True" || value === "Yes" || value === "yes") return true;
+      if (value === "false" || value === "False" || value === "No" || value === "no") return false;
+      return null;
+    }
+
+    function cleanGuid(value) {
+      const text = String(value || "").trim();
+      const match = text.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+      return match ? match[0].toLowerCase() : text;
+    }
+
+    function setMessage(text, kind) {
+      elements.message.textContent = text;
+      elements.message.className = `message${kind ? ` ${kind}` : ""}`;
+    }
+
+    function getErrorMessage(error) {
+      return error && error.message ? error.message : String(error || "Unknown error");
+    }
+
+    function getXrm() {
+      if (window.Xrm) return window.Xrm;
+      try {
+        if (window.parent && window.parent.Xrm) return window.parent.Xrm;
+      } catch (error) {
+        return null;
+      }
+      return null;
+    }
+
+    function getGlobalContext() {
+      if (state.xrm && state.xrm.Utility && state.xrm.Utility.getGlobalContext) return state.xrm.Utility.getGlobalContext();
+      return null;
+    }
+  </script>
+</body>
+</html>
