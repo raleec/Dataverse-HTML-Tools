@@ -22,6 +22,7 @@ Install an individual solution only when the target environment needs a specific
 | [Team Role and People Manager](tools/team-role-people-manager/README.md) | [HTML web resource](tools/team-role-people-manager/src/TeamRolePeopleManager.html) | [Docs](tools/team-role-people-manager/README.md) |
 | [Flow Dependency Viewer](tools/flow-dependency-viewer/README.md) | [HTML web resource](tools/flow-dependency-viewer/solution/src/WebResources/fdv_/flowdependencyviewer.htm) | [Docs](tools/flow-dependency-viewer/README.md) |
 | [Solution Service Inspector](tools/solution-service-inspector/README.md) | [HTML web resource](tools/solution-service-inspector/src/SolutionServiceInspector.html) | [Docs](tools/solution-service-inspector/README.md) |
+| [Tenant Role Catalogue](tools/tenant-role-catalogue/README.md) | [HTML web resource](tools/tenant-role-catalogue/src/TenantRoleCatalogue.html) | [Docs](docs/TenantRoleCatalogue.md) |
 
 ## Screenshots
 
@@ -66,6 +67,8 @@ Use one of these deployment paths:
 3. **Manual install:** add the tool's HTML file as a Dataverse **Webpage (HTML)** web resource, publish customizations, then add that web resource to an admin model-driven app.
 
 Use `themeOption=darkmode` when a model-driven app URL should force dark mode. The pages also handle that flag when it is encoded in the web resource `data` parameter. Dataverse/Power Platform HTML tools should default to light mode unless that explicit dark-mode flag is present.
+
+The Tenant Role Catalogue is currently source-only. Deploy it manually as an HTML web resource and use the Power Automate collector design in its tool folder for tenant-level inventory.
 
 ## Security model
 

@@ -2,6 +2,8 @@
 
 `Dataverse HTML Tools Suite` is the combined installation option for all repository tools. It includes the `Admin Tools` model-driven app, seven HTML web resources, and dedicated User and Team forms.
 
+Tenant Role Catalogue is not yet packaged in the Suite; deploy it manually from `tools/tenant-role-catalogue/src/TenantRoleCatalogue.html` when tenant role inventory is required.
+
 ## Included experience
 
 - `Admin Tools` model-driven app.

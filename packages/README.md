@@ -24,3 +24,5 @@ Use an individual package only when the target environment needs a specific tool
 | Flow Dependency Viewer | [Unmanaged ZIP](flow-dependency-viewer/FlowDependencyViewerSolution.zip) | [Managed ZIP](flow-dependency-viewer/FlowDependencyViewerSolution_managed.zip) |
 | Solution Service Inspector | [Unmanaged ZIP](solution-service-inspector/SolutionServiceInspectorSolution.zip) | [Managed ZIP](solution-service-inspector/SolutionServiceInspectorSolution_managed.zip) |
 | Business Unit Configuration | [Unmanaged ZIP](business-unit-configuration/DataverseHtmlToolsBusinessUnitConfiguration.zip) | [Managed ZIP](business-unit-configuration/DataverseHtmlToolsBusinessUnitConfiguration_managed.zip) |
+
+Tenant Role Catalogue is currently distributed as source only under `tools/tenant-role-catalogue` and can be deployed manually as an HTML web resource.
