@@ -231,6 +231,7 @@
   <script>
     const MAX_RENDERED_ROWS = 1000;
     const TABLE_COLUMN_COUNT = 7;
+    const LENGTH_SUFFIX = ".length";
 
     const state = {
       rows: [],
@@ -600,9 +601,8 @@
 
     function firstScalar(input, paths) {
       for (const path of paths) {
-        const lengthSuffix = ".length";
-        if (path.endsWith(lengthSuffix)) {
-          const baseValue = getPath(input, path.slice(0, -lengthSuffix.length));
+        if (path.endsWith(LENGTH_SUFFIX)) {
+          const baseValue = getPath(input, path.slice(0, -LENGTH_SUFFIX.length));
           if (Array.isArray(baseValue)) return baseValue.length;
         }
         const value = getPath(input, path);

@@ -36,6 +36,13 @@ def read(path: Path) -> str:
     return path.read_text(encoding="utf-8-sig")
 
 
+def read_required(path: Path, failures: list[str]) -> str:
+    if not path.exists():
+        failures.append(f"Missing required file: {path}")
+        return ""
+    return read(path)
+
+
 def validate_source(failures: list[str]) -> str:
     require(TENANT_SOURCE.exists(), f"Missing source HTML: {TENANT_SOURCE}", failures)
     require(TENANT_SUITE.exists(), f"Missing suite web resource: {TENANT_SUITE}", failures)
@@ -49,36 +56,43 @@ def validate_source(failures: list[str]) -> str:
     tenant_payload = ""
     require(TENANT_METADATA.exists(), f"Missing metadata: {TENANT_METADATA}", failures)
     if TENANT_METADATA.exists():
-        metadata_root = ET.parse(TENANT_METADATA).getroot()
-        expected_values = {
-            "Name": "dht_/TenantRoleCatalogue.html",
-            "DisplayName": "Tenant Role Catalogue",
-            "WebResourceType": "1",
-        }
-        for tag, expected in expected_values.items():
-            actual = metadata_root.findtext(tag)
-            require(actual == expected, f"Tenant metadata {tag} expected {expected!r} but found {actual!r}", failures)
-        filename = metadata_root.findtext("FileName") or ""
-        tenant_payload = filename.lstrip("/")
-        expected_prefix = "WebResources/dht_TenantRoleCataloguehtml"
+        try:
+            metadata_root = ET.parse(TENANT_METADATA).getroot()
+        except ET.ParseError as error:
+            failures.append(f"Malformed metadata XML in {TENANT_METADATA}: {error}")
+        else:
+            expected_values = {
+                "Name": "dht_/TenantRoleCatalogue.html",
+                "DisplayName": "Tenant Role Catalogue",
+                "WebResourceType": "1",
+            }
+            for tag, expected in expected_values.items():
+                actual = metadata_root.findtext(tag)
+                require(actual == expected, f"Tenant metadata {tag} expected {expected!r} but found {actual!r}", failures)
+            filename = metadata_root.findtext("FileName") or ""
+            tenant_payload = filename.lstrip("/")
+            expected_prefix = "WebResources/dht_TenantRoleCataloguehtml"
+            require(
+                tenant_payload.startswith(expected_prefix),
+                f"Tenant metadata FileName has unexpected payload path {tenant_payload!r}; expected prefix {expected_prefix!r}",
+                failures,
+            )
+
+    solution = read_required(SOLUTION / "Other" / "Solution.xml", failures)
+    if solution:
         require(
-            tenant_payload.startswith(expected_prefix),
-            f"Tenant metadata FileName has unexpected payload path {tenant_payload!r}; expected prefix {expected_prefix!r}",
+            '<RootComponent type="61" schemaName="dht_/TenantRoleCatalogue.html" behavior="0" />' in solution,
+            "Solution.xml is missing Tenant Role Catalogue root component",
             failures,
         )
-
-    solution = read(SOLUTION / "Other" / "Solution.xml")
-    require(
-        '<RootComponent type="61" schemaName="dht_/TenantRoleCatalogue.html" behavior="0" />' in solution,
-        "Solution.xml is missing Tenant Role Catalogue root component",
-        failures,
-    )
 
     for sitemap in [
         SOLUTION / "AppModuleSiteMaps" / "admin_tools_0b5e60bd" / "AppModuleSiteMap.xml",
         SOLUTION / "AppModuleSiteMaps" / "admin_tools_0b5e60bd" / "AppModuleSiteMap_managed.xml",
     ]:
-        content = read(sitemap)
+        content = read_required(sitemap, failures)
+        if not content:
+            continue
         label = sitemap.relative_to(SOLUTION)
         for url, title in REQUIRED_NAV_URLS.items():
             require(url in content, f"{label} missing navigation URL {url}", failures)
