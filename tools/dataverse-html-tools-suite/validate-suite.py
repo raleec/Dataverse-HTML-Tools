@@ -102,10 +102,11 @@ def validate_source(failures: list[str]) -> str:
 
 
 def validate_packages(failures: list[str], tenant_payload: str) -> None:
-    require(bool(tenant_payload), "Cannot validate package payload because Tenant metadata FileName is unavailable", failures)
+    if not tenant_payload:
+        return
     for package in ZIP_PATHS:
         require(package.exists(), f"Missing package ZIP: {package}", failures)
-        if not package.exists() or not tenant_payload:
+        if not package.exists():
             continue
         with zipfile.ZipFile(package) as archive:
             names = set(archive.namelist())

@@ -46,6 +46,7 @@
       <TenantRoleCatalogueSuiteFileHash>@(TenantRoleCatalogueSuiteHash->'%(FileHash)')</TenantRoleCatalogueSuiteFileHash>
     </PropertyGroup>
     <Error Condition="'$(TenantRoleCatalogueSourceFileHash)' != '$(TenantRoleCatalogueSuiteFileHash)'" Text="Tenant Role Catalogue suite web resource is out of sync with the tool source. Copy tools/tenant-role-catalogue/src/TenantRoleCatalogue.html to tools/dataverse-html-tools-suite/solution/src/WebResources/dht_/TenantRoleCatalogue.html before building." />
+    <MakeDir Directories="$(BaseIntermediateOutputPath)" />
     <Touch Files="$(BaseIntermediateOutputPath)TenantRoleCatalogueWebResource.validation" AlwaysCreate="true" />
   </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
