@@ -25,15 +25,15 @@ Power Automate collector design:
 
 ## Where to use it
 
-Add `src\TenantRoleCatalogue.html` as a Dataverse **Webpage (HTML) web resource**, then add it to an admin model-driven app as a standalone page/navigation item.
+Install the Dataverse HTML Tools Suite to get Tenant Role Catalogue as a bundled standalone page in the `Admin Tools` model-driven app. For partial or source-only deployments, you can still add `src\TenantRoleCatalogue.html` as a Dataverse **Webpage (HTML) web resource**, then add it to an admin model-driven app as a standalone page/navigation item.
 
-The browser page runs in the signed-in user's Dataverse context. Tenant-wide discovery and cross-environment role reads must come from an imported Power Automate collector JSON file or another approved backend export.
+The browser page runs in the signed-in user's Dataverse context. Tenant-wide discovery and cross-environment role reads must come from an imported Power Automate collector JSON file or another approved backend export. The Suite bundles this HTML UI; it does not install the collector or role-create cloud flows.
 
 ## Main workflow
 
-1. Open the tool in an admin model-driven app.
+1. Open **Tenant Role Catalogue** from the Suite `Admin Tools` app, or from another admin model-driven app where the standalone HTML web resource is deployed.
 2. Use **Load current environment roles** to catalogue roles visible in the hosting environment.
-3. Run the Power Automate collector flow for tenant-wide role inventory.
+3. Run the separately configured Power Automate collector flow for tenant-wide role inventory.
 4. Import the generated JSON with **Power Automate collector JSON**.
 5. Filter by environment, role name, business unit, managed state, or source.
 6. Export the normalized catalogue to JSON or CSV.
@@ -65,7 +65,7 @@ The page does not silently create roles across tenant environments. It generates
 - Requested timestamp
 - Copy/fallback options
 
-A separate Power Automate flow should consume that request, resolve the source role and business unit per environment, create the role, copy privileges when requested, and return per-environment results.
+A separate reviewed Power Automate flow should consume that request, resolve the source role and business unit per environment, create the role, copy privileges when requested, and return per-environment results. Importing the Suite does not create or enable this automation.
 
 ## Required privileges
 

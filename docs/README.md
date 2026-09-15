@@ -4,7 +4,7 @@ The recommended installation is [Dataverse HTML Tools Suite](DataverseHTMLToolsS
 
 Individual tool packages remain available for partial deployments where the Suite is not required.
 
-The Suite includes seven HTML web resources built to make Dataverse and Power Platform administration easier inside model-driven apps:
+The Suite includes eight HTML web resources built to make Dataverse and Power Platform administration easier inside model-driven apps:
 
 1. **User Effective Security Roles** - User form helpers for viewing and managing roles and team memberships, plus a read-only record-access view for shares, Field Security Profiles, and hierarchy context.
 2. **User Record Access** - a companion User form helper for reviewing explicit record shares, Field Security Profiles, and hierarchy context.
@@ -13,8 +13,9 @@ The Suite includes seven HTML web resources built to make Dataverse and Power Pl
 5. **Flow Dependency Viewer** - a solution-level helper for viewing cloud-flow dependencies, activation order, required environment variables, and missing environment-variable values.
 6. **Solution Service Inspector** - an inventory helper for reviewing solutions, apps, flows, connected services, SharePoint URLs, sharing signals, and non-authoritative migration signals.
 7. **Business Unit Configuration** - a filtered, sortable user list for previewing and batch-moving users between business units with optional permission cloning.
+8. **Tenant Role Catalogue** - a standalone role inventory page for current-environment reads, imported Power Automate tenant catalogues, JSON/CSV export, and explicit reviewed role-create request generation.
 
-The repository also includes **Tenant Role Catalogue**, a source-only standalone web resource for current-environment role inventory and imported Power Automate tenant role catalogue exports.
+Tenant Role Catalogue tenant-wide inventory and create execution still require separately configured Power Automate automation; importing the Suite bundles the UI only.
 
 All tools are designed to run as **Dataverse HTML web resources** so they can use the signed-in admin's Dataverse context and `Xrm.WebApi`.
 
