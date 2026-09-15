@@ -14,6 +14,8 @@ The Suite includes seven HTML web resources built to make Dataverse and Power Pl
 6. **Solution Service Inspector** - an inventory helper for reviewing solutions, apps, flows, connected services, SharePoint URLs, sharing signals, and non-authoritative migration signals.
 7. **Business Unit Configuration** - a filtered, sortable user list for previewing and batch-moving users between business units with optional permission cloning.
 
+The repository also includes **Tenant Role Catalogue**, a source-only standalone web resource for current-environment role inventory and imported Power Automate tenant role catalogue exports.
+
 All tools are designed to run as **Dataverse HTML web resources** so they can use the signed-in admin's Dataverse context and `Xrm.WebApi`.
 
 ## Files
@@ -32,6 +34,7 @@ All tools are designed to run as **Dataverse HTML web resources** so they can us
 | Team Role and People Manager | [HTML web resource](../tools/team-role-people-manager/src/TeamRolePeopleManager.html) |
 | Flow Dependency Viewer | [HTML web resource](../tools/flow-dependency-viewer/solution/src/WebResources/fdv_/flowdependencyviewer.htm) |
 | Solution Service Inspector | [HTML web resource](../tools/solution-service-inspector/src/SolutionServiceInspector.html) |
+| Tenant Role Catalogue | [HTML web resource](../tools/tenant-role-catalogue/src/TenantRoleCatalogue.html) |
 | User Effective Security Roles unmanaged solution | [ZIP](../packages/user-effective-security-roles/UserEffectiveSecurityRolesSolution.zip) |
 | User Effective Security Roles managed solution | [ZIP](../packages/user-effective-security-roles/UserEffectiveSecurityRolesSolution_managed.zip) |
 | Role Table Permission Copier unmanaged solution | [ZIP](../packages/role-table-permission-copier/RoleTablePermissionCopierSolution.zip) |
@@ -70,6 +73,7 @@ Recommended placement:
 | Team Role and People Manager | Team (`team`) form; pass the record ID |
 | Flow Dependency Viewer | Standalone admin app page/navigation item; optionally pass `solutionReference` |
 | Solution Service Inspector | Standalone admin app page/navigation item; same-environment solution/app/flow inventory |
+| Tenant Role Catalogue | Standalone admin app page/navigation item; current-environment role inventory plus imported Power Automate collector JSON |
 
 ## Security model
 
@@ -85,5 +89,6 @@ For Entra-backed teams, membership is shown read-only and managed through Micros
 - [Team Role and People Manager](TeamRolePeopleManager.md)
 - [Flow Dependency Viewer](FlowDependencyViewer.md)
 - [Solution Service Inspector](SolutionServiceInspector.md)
+- [Tenant Role Catalogue](TenantRoleCatalogue.md)
 - [LinkedIn article draft](articles/LinkedInArticle.md)
 - [LinkedIn copy/paste text](articles/LinkedInArticle_CopyPaste.txt)
