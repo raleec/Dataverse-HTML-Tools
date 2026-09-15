@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import sys
 import zipfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -13,7 +14,6 @@ SOLUTION = SUITE / "solution" / "src"
 TENANT_SOURCE = ROOT / "tools" / "tenant-role-catalogue" / "src" / "TenantRoleCatalogue.html"
 TENANT_SUITE = SOLUTION / "WebResources" / "dht_" / "TenantRoleCatalogue.html"
 TENANT_METADATA = TENANT_SUITE.with_suffix(TENANT_SUITE.suffix + ".data.xml")
-TENANT_PAYLOAD = "WebResources/dht_TenantRoleCataloguehtml9B0A9949-2D2D-4F35-8D22-56D5377EDC2F"
 REQUIRED_NAV_URLS = {
     "$webresource:fdv_/flowdependencyviewer.htm": "Flow Dependency Viewer",
     "$webresource:dht_/RoleTablePermissionCopier.html": "Role Table Permission Copier",
@@ -36,7 +36,7 @@ def read(path: Path) -> str:
     return path.read_text(encoding="utf-8-sig")
 
 
-def validate_source(failures: list[str]) -> None:
+def validate_source(failures: list[str]) -> str:
     require(TENANT_SOURCE.exists(), f"Missing source HTML: {TENANT_SOURCE}", failures)
     require(TENANT_SUITE.exists(), f"Missing suite web resource: {TENANT_SUITE}", failures)
     if TENANT_SOURCE.exists() and TENANT_SUITE.exists():
@@ -46,15 +46,21 @@ def validate_source(failures: list[str]) -> None:
             failures,
         )
 
-    metadata = read(TENANT_METADATA) if TENANT_METADATA.exists() else ""
+    tenant_payload = ""
     require(TENANT_METADATA.exists(), f"Missing metadata: {TENANT_METADATA}", failures)
-    for expected in [
-        "<Name>dht_/TenantRoleCatalogue.html</Name>",
-        "<DisplayName>Tenant Role Catalogue</DisplayName>",
-        "<WebResourceType>1</WebResourceType>",
-        f"<FileName>/{TENANT_PAYLOAD}</FileName>",
-    ]:
-        require(expected in metadata, f"Tenant metadata missing {expected}", failures)
+    if TENANT_METADATA.exists():
+        metadata_root = ET.parse(TENANT_METADATA).getroot()
+        expected_values = {
+            "Name": "dht_/TenantRoleCatalogue.html",
+            "DisplayName": "Tenant Role Catalogue",
+            "WebResourceType": "1",
+        }
+        for tag, expected in expected_values.items():
+            actual = metadata_root.findtext(tag)
+            require(actual == expected, f"Tenant metadata {tag} expected {expected!r} but found {actual!r}", failures)
+        filename = metadata_root.findtext("FileName") or ""
+        tenant_payload = filename.lstrip("/")
+        require(tenant_payload.startswith("WebResources/dht_TenantRoleCataloguehtml"), "Tenant metadata FileName has an unexpected payload path", failures)
 
     solution = read(SOLUTION / "Other" / "Solution.xml")
     require(
@@ -68,19 +74,23 @@ def validate_source(failures: list[str]) -> None:
         SOLUTION / "AppModuleSiteMaps" / "admin_tools_0b5e60bd" / "AppModuleSiteMap_managed.xml",
     ]:
         content = read(sitemap)
+        label = sitemap.relative_to(SOLUTION)
         for url, title in REQUIRED_NAV_URLS.items():
-            require(url in content, f"{sitemap.name} missing navigation URL {url}", failures)
-            require(f'Title="{title}"' in content, f"{sitemap.name} missing title {title}", failures)
+            require(url in content, f"{label} missing navigation URL {url}", failures)
+            require(f'Title="{title}"' in content, f"{label} missing title {title}", failures)
+
+    return tenant_payload
 
 
-def validate_packages(failures: list[str]) -> None:
+def validate_packages(failures: list[str], tenant_payload: str) -> None:
+    require(bool(tenant_payload), "Cannot validate package payload because Tenant metadata FileName is unavailable", failures)
     for package in ZIP_PATHS:
         require(package.exists(), f"Missing package ZIP: {package}", failures)
-        if not package.exists():
+        if not package.exists() or not tenant_payload:
             continue
         with zipfile.ZipFile(package) as archive:
             names = set(archive.namelist())
-            require(TENANT_PAYLOAD in names, f"{package.name} missing {TENANT_PAYLOAD}", failures)
+            require(tenant_payload in names, f"{package.name} missing {tenant_payload}", failures)
             if "solution.xml" in names:
                 solution = archive.read("solution.xml").decode("utf-8-sig")
                 require("dht_/TenantRoleCatalogue.html" in solution, f"{package.name} solution.xml missing Tenant Role Catalogue", failures)
@@ -100,9 +110,9 @@ def main() -> int:
     args = parser.parse_args()
 
     failures: list[str] = []
-    validate_source(failures)
+    tenant_payload = validate_source(failures)
     if args.check_packages:
-        validate_packages(failures)
+        validate_packages(failures, tenant_payload)
 
     if failures:
         print("Suite validation failed:", file=sys.stderr)

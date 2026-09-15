@@ -27,4 +27,4 @@ After import, publish customizations if Dataverse prompts for it, then grant use
 
 ## Build
 
-Build `solution/DataverseHTMLToolsSuite.cdsproj` in Release configuration. It produces both managed and unmanaged solution ZIPs. Run `python validate-suite.py` before building and `python validate-suite.py --check-packages` after regenerating the package ZIPs.
+From `tools/dataverse-html-tools-suite`, run `python3 validate-suite.py` before building. Build `solution/DataverseHTMLToolsSuite.cdsproj` in Release configuration; it produces both managed and unmanaged solution ZIPs. After regenerating the package ZIPs, run `python3 validate-suite.py --check-packages`.
