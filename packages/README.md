@@ -26,3 +26,14 @@ Use an individual package only when the target environment needs a specific tool
 | Business Unit Configuration | [Unmanaged ZIP](business-unit-configuration/DataverseHtmlToolsBusinessUnitConfiguration.zip) | [Managed ZIP](business-unit-configuration/DataverseHtmlToolsBusinessUnitConfiguration_managed.zip) |
 
 Tenant Role Catalogue is bundled in the Suite as an `Admin Tools` standalone page. It can still be deployed manually from `tools/tenant-role-catalogue` for source-only scenarios; tenant-wide inventory/create automation must be configured separately.
+
+## Regenerating packages
+
+Every ZIP in this folder is produced by SolutionPackager from the matching `tools/<tool>/solution/src` folder. Hand-assembled archives are rejected by Dataverse with `The solution file is invalid. The compressed file must contain the following files at its root: solution.xml, customizations.xml, and [Content_Types].xml.`
+
+Build the `.cdsproj` in Release configuration, or use the Power Platform CLI directly:
+
+```
+pac solution pack --zipfile packages/<tool>/<Name>.zip --folder tools/<tool>/solution/src --packagetype Unmanaged
+pac solution pack --zipfile packages/<tool>/<Name>_managed.zip --folder tools/<tool>/solution/src --packagetype Managed
+```
