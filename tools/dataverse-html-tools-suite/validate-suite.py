@@ -103,6 +103,7 @@ def validate_source(failures: list[str]) -> str:
 
 def validate_packages(failures: list[str], tenant_payload: str) -> None:
     if not tenant_payload:
+        failures.append("Cannot validate packages: tenant web resource payload path is unknown")
         return
     for package in ZIP_PATHS:
         require(package.exists(), f"Missing package ZIP: {package}", failures)

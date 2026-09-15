@@ -35,6 +35,8 @@
     </Content>
   </ItemGroup>
   <Target Name="ValidateTenantRoleCatalogueWebResource" BeforeTargets="BeforeBuild" Inputs="$(TenantRoleCatalogueSource);$(TenantRoleCatalogueSuiteWebResource)" Outputs="$(BaseIntermediateOutputPath)TenantRoleCatalogueWebResource.validation">
+    <Error Condition="!Exists('$(TenantRoleCatalogueSource)')" Text="Tenant Role Catalogue source file is missing: $(TenantRoleCatalogueSource)" />
+    <Error Condition="!Exists('$(TenantRoleCatalogueSuiteWebResource)')" Text="Tenant Role Catalogue suite web resource is missing: $(TenantRoleCatalogueSuiteWebResource). Copy tools/tenant-role-catalogue/src/TenantRoleCatalogue.html to tools/dataverse-html-tools-suite/solution/src/WebResources/dht_/TenantRoleCatalogue.html before building." />
     <GetFileHash Files="$(TenantRoleCatalogueSource)">
       <Output TaskParameter="Items" ItemName="TenantRoleCatalogueSourceHash" />
     </GetFileHash>
