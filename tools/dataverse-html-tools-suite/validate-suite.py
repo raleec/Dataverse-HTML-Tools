@@ -13,7 +13,7 @@ SUITE = ROOT / "tools" / "dataverse-html-tools-suite"
 SOLUTION = SUITE / "solution" / "src"
 TENANT_SOURCE = ROOT / "tools" / "tenant-role-catalogue" / "src" / "TenantRoleCatalogue.html"
 TENANT_SUITE = SOLUTION / "WebResources" / "dht_" / "TenantRoleCatalogue.html"
-TENANT_METADATA = TENANT_SUITE.with_suffix(TENANT_SUITE.suffix + ".data.xml")
+TENANT_METADATA = TENANT_SUITE.parent / f"{TENANT_SUITE.name}.data.xml"
 REQUIRED_NAV_URLS = {
     "$webresource:fdv_/flowdependencyviewer.htm": "Flow Dependency Viewer",
     "$webresource:dht_/RoleTablePermissionCopier.html": "Role Table Permission Copier",

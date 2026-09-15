@@ -230,6 +230,7 @@
 
   <script>
     const MAX_RENDERED_ROWS = 1000;
+    const TABLE_COLUMN_COUNT = 7;
 
     const state = {
       rows: [],
@@ -432,7 +433,7 @@
       if (!rows.length) {
         const tr = document.createElement("tr");
         const td = document.createElement("td");
-        td.colSpan = 7;
+        td.colSpan = TABLE_COLUMN_COUNT;
         td.textContent = state.rows.length ? "No roles match the current filters." : "No roles loaded yet.";
         tr.appendChild(td);
         elements.roleRows.appendChild(tr);
@@ -454,7 +455,7 @@
       if (rows.length > renderedRows.length) {
         const tr = document.createElement("tr");
         const td = document.createElement("td");
-        td.colSpan = 7;
+        td.colSpan = TABLE_COLUMN_COUNT;
         td.textContent = `Showing first ${renderedRows.length} of ${rows.length} matching roles. Refine filters or export for the full result set.`;
         tr.appendChild(td);
         elements.roleRows.appendChild(tr);

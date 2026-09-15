@@ -34,8 +34,19 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <Target Name="SyncTenantRoleCatalogueWebResource" BeforeTargets="BeforeBuild">
-    <Copy SourceFiles="$(TenantRoleCatalogueSource)" DestinationFiles="$(TenantRoleCatalogueSuiteWebResource)" SkipUnchangedFiles="true" />
+  <Target Name="ValidateTenantRoleCatalogueWebResource" BeforeTargets="BeforeBuild" Inputs="$(TenantRoleCatalogueSource);$(TenantRoleCatalogueSuiteWebResource)" Outputs="$(BaseIntermediateOutputPath)TenantRoleCatalogueWebResource.validation">
+    <GetFileHash Files="$(TenantRoleCatalogueSource)">
+      <Output TaskParameter="Items" ItemName="TenantRoleCatalogueSourceHash" />
+    </GetFileHash>
+    <GetFileHash Files="$(TenantRoleCatalogueSuiteWebResource)">
+      <Output TaskParameter="Items" ItemName="TenantRoleCatalogueSuiteHash" />
+    </GetFileHash>
+    <PropertyGroup>
+      <TenantRoleCatalogueSourceFileHash>@(TenantRoleCatalogueSourceHash->'%(FileHash)')</TenantRoleCatalogueSourceFileHash>
+      <TenantRoleCatalogueSuiteFileHash>@(TenantRoleCatalogueSuiteHash->'%(FileHash)')</TenantRoleCatalogueSuiteFileHash>
+    </PropertyGroup>
+    <Error Condition="'$(TenantRoleCatalogueSourceFileHash)' != '$(TenantRoleCatalogueSuiteFileHash)'" Text="Tenant Role Catalogue suite web resource is out of sync with the tool source. Copy tools/tenant-role-catalogue/src/TenantRoleCatalogue.html to tools/dataverse-html-tools-suite/solution/src/WebResources/dht_/TenantRoleCatalogue.html before building." />
+    <Touch Files="$(BaseIntermediateOutputPath)TenantRoleCatalogueWebResource.validation" AlwaysCreate="true" />
   </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
   <Import Project="$(PowerAppsTargetsPath)\Microsoft.PowerApps.VisualStudio.Solution.targets" Condition="Exists('$(PowerAppsTargetsPath)\Microsoft.PowerApps.VisualStudio.Solution.targets')" />
