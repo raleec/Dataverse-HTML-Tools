@@ -68,7 +68,7 @@ Use one of these deployment paths:
 
 Use `themeOption=darkmode` when a model-driven app URL should force dark mode. The pages also handle that flag when it is encoded in the web resource `data` parameter. Dataverse/Power Platform HTML tools should default to light mode unless that explicit dark-mode flag is present.
 
-The Tenant Role Catalogue is currently source-only. Deploy it manually as an HTML web resource and use the Power Automate collector design in its tool folder for tenant-level inventory.
+The Suite includes Tenant Role Catalogue as an `Admin Tools` standalone page. Tenant-wide inventory and role-create execution still require the separately configured Power Automate collector/create workflows described in the tool folder.
 
 ## Security model
 

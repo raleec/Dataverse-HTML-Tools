@@ -13,6 +13,8 @@
     <SolutionRootPath>src</SolutionRootPath>
     <SolutionPackageType>Both</SolutionPackageType>
     <SolutionPackageEnableLocalization>false</SolutionPackageEnableLocalization>
+    <TenantRoleCatalogueSource>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', '..', '..', 'tenant-role-catalogue', 'src', 'TenantRoleCatalogue.html'))</TenantRoleCatalogueSource>
+    <TenantRoleCatalogueSuiteWebResource>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', 'src', 'WebResources', 'dht_', 'TenantRoleCatalogue.html'))</TenantRoleCatalogueSuiteWebResource>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.PowerApps.MSBuild.Solution" Version="1.*" />
@@ -32,6 +34,23 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <Target Name="ValidateTenantRoleCatalogueWebResource" BeforeTargets="BeforeBuild" Inputs="$(TenantRoleCatalogueSource);$(TenantRoleCatalogueSuiteWebResource)" Outputs="$(BaseIntermediateOutputPath)TenantRoleCatalogueWebResource.validation">
+    <Error Condition="!Exists('$(TenantRoleCatalogueSource)')" Text="Tenant Role Catalogue source file is missing: $(TenantRoleCatalogueSource)" />
+    <Error Condition="!Exists('$(TenantRoleCatalogueSuiteWebResource)')" Text="Tenant Role Catalogue suite web resource is missing: $(TenantRoleCatalogueSuiteWebResource). Copy tools/tenant-role-catalogue/src/TenantRoleCatalogue.html to tools/dataverse-html-tools-suite/solution/src/WebResources/dht_/TenantRoleCatalogue.html before building." />
+    <GetFileHash Files="$(TenantRoleCatalogueSource)">
+      <Output TaskParameter="Items" ItemName="TenantRoleCatalogueSourceHash" />
+    </GetFileHash>
+    <GetFileHash Files="$(TenantRoleCatalogueSuiteWebResource)">
+      <Output TaskParameter="Items" ItemName="TenantRoleCatalogueSuiteHash" />
+    </GetFileHash>
+    <PropertyGroup>
+      <TenantRoleCatalogueSourceFileHash>@(TenantRoleCatalogueSourceHash->'%(FileHash)')</TenantRoleCatalogueSourceFileHash>
+      <TenantRoleCatalogueSuiteFileHash>@(TenantRoleCatalogueSuiteHash->'%(FileHash)')</TenantRoleCatalogueSuiteFileHash>
+    </PropertyGroup>
+    <Error Condition="'$(TenantRoleCatalogueSourceFileHash)' != '$(TenantRoleCatalogueSuiteFileHash)'" Text="Tenant Role Catalogue suite web resource is out of sync with the tool source. Copy tools/tenant-role-catalogue/src/TenantRoleCatalogue.html to tools/dataverse-html-tools-suite/solution/src/WebResources/dht_/TenantRoleCatalogue.html before building." />
+    <MakeDir Directories="$(BaseIntermediateOutputPath)" />
+    <Touch Files="$(BaseIntermediateOutputPath)TenantRoleCatalogueWebResource.validation" AlwaysCreate="true" />
+  </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
   <Import Project="$(PowerAppsTargetsPath)\Microsoft.PowerApps.VisualStudio.Solution.targets" Condition="Exists('$(PowerAppsTargetsPath)\Microsoft.PowerApps.VisualStudio.Solution.targets')" />
 </Project>

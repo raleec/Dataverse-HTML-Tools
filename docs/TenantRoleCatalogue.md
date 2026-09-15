@@ -1,6 +1,6 @@
 # Tenant Role Catalogue
 
-The **Tenant Role Catalogue** is a source-only HTML web resource for tenant-level Dataverse security-role inventory workflows.
+The **Tenant Role Catalogue** is included in the Dataverse HTML Tools Suite as a standalone `Admin Tools` app page and remains available as a source HTML web resource for tenant-level Dataverse security-role inventory workflows.
 
 Use it when you need to:
 
@@ -16,6 +16,6 @@ Repository files:
 - [Tool README](../tools/tenant-role-catalogue/README.md)
 - [Power Automate collector design](../tools/tenant-role-catalogue/PowerAutomateCollector.md)
 
-The same-environment mode uses `Xrm.WebApi` and the signed-in user's Dataverse context. Tenant-wide inventory requires an imported collector JSON file; the browser page does not directly enumerate every tenant environment.
+The same-environment mode uses `Xrm.WebApi` and the signed-in user's Dataverse context. Tenant-wide inventory requires an imported collector JSON file; the browser page does not directly enumerate every tenant environment. Importing the Suite bundles the UI but does not install a collector or role-create cloud flow.
 
 The collector design prefers **Power Platform for Admins V2** environment discovery, then falls back to legacy admin connector output or a manually supplied environment array when V2 actions are unavailable.

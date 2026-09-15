@@ -6,7 +6,7 @@ Each listed tool currently has managed and unmanaged ZIP packages. The Suite is 
 
 ## Recommended: Full Suite
 
-Install the **Dataverse HTML Tools Suite** to get the `Admin Tools` model-driven app, dedicated User and Team forms, standalone tool pages, and every included web resource.
+Install the **Dataverse HTML Tools Suite** to get the `Admin Tools` model-driven app, dedicated User and Team forms, standalone tool pages including Tenant Role Catalogue, and every included web resource.
 
 | Suite | Unmanaged package | Managed package |
 |---|---|---|
@@ -25,4 +25,4 @@ Use an individual package only when the target environment needs a specific tool
 | Solution Service Inspector | [Unmanaged ZIP](solution-service-inspector/SolutionServiceInspectorSolution.zip) | [Managed ZIP](solution-service-inspector/SolutionServiceInspectorSolution_managed.zip) |
 | Business Unit Configuration | [Unmanaged ZIP](business-unit-configuration/DataverseHtmlToolsBusinessUnitConfiguration.zip) | [Managed ZIP](business-unit-configuration/DataverseHtmlToolsBusinessUnitConfiguration_managed.zip) |
 
-Tenant Role Catalogue is currently distributed as source only under `tools/tenant-role-catalogue` and can be deployed manually as an HTML web resource.
+Tenant Role Catalogue is bundled in the Suite as an `Admin Tools` standalone page. It can still be deployed manually from `tools/tenant-role-catalogue` for source-only scenarios; tenant-wide inventory/create automation must be configured separately.
