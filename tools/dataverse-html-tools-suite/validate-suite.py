@@ -60,7 +60,12 @@ def validate_source(failures: list[str]) -> str:
             require(actual == expected, f"Tenant metadata {tag} expected {expected!r} but found {actual!r}", failures)
         filename = metadata_root.findtext("FileName") or ""
         tenant_payload = filename.lstrip("/")
-        require(tenant_payload.startswith("WebResources/dht_TenantRoleCataloguehtml"), "Tenant metadata FileName has an unexpected payload path", failures)
+        expected_prefix = "WebResources/dht_TenantRoleCataloguehtml"
+        require(
+            tenant_payload.startswith(expected_prefix),
+            f"Tenant metadata FileName has unexpected payload path {tenant_payload!r}; expected prefix {expected_prefix!r}",
+            failures,
+        )
 
     solution = read(SOLUTION / "Other" / "Solution.xml")
     require(

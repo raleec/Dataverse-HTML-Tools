@@ -13,6 +13,8 @@
     <SolutionRootPath>src</SolutionRootPath>
     <SolutionPackageType>Both</SolutionPackageType>
     <SolutionPackageEnableLocalization>false</SolutionPackageEnableLocalization>
+    <TenantRoleCatalogueSource>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', '..', '..', 'tenant-role-catalogue', 'src', 'TenantRoleCatalogue.html'))</TenantRoleCatalogueSource>
+    <TenantRoleCatalogueSuiteWebResource>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', 'src', 'WebResources', 'dht_', 'TenantRoleCatalogue.html'))</TenantRoleCatalogueSuiteWebResource>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.PowerApps.MSBuild.Solution" Version="1.*" />
@@ -33,7 +35,7 @@
     </Content>
   </ItemGroup>
   <Target Name="SyncTenantRoleCatalogueWebResource" BeforeTargets="BeforeBuild">
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)../../tenant-role-catalogue/src/TenantRoleCatalogue.html" DestinationFiles="$(MSBuildThisFileDirectory)src/WebResources/dht_/TenantRoleCatalogue.html" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(TenantRoleCatalogueSource)" DestinationFiles="$(TenantRoleCatalogueSuiteWebResource)" SkipUnchangedFiles="true" />
   </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
   <Import Project="$(PowerAppsTargetsPath)\Microsoft.PowerApps.VisualStudio.Solution.targets" Condition="Exists('$(PowerAppsTargetsPath)\Microsoft.PowerApps.VisualStudio.Solution.targets')" />

@@ -229,6 +229,8 @@
   </main>
 
   <script>
+    const MAX_RENDERED_ROWS = 1000;
+
     const state = {
       rows: [],
       failures: [],
@@ -437,7 +439,8 @@
         return;
       }
 
-      rows.slice(0, 1000).forEach((row) => {
+      const renderedRows = rows.slice(0, MAX_RENDERED_ROWS);
+      renderedRows.forEach((row) => {
         const tr = document.createElement("tr");
         appendCell(tr, row.environment.displayName);
         appendCell(tr, row.roleName);
@@ -448,6 +451,14 @@
         appendCell(tr, row.roleId);
         elements.roleRows.appendChild(tr);
       });
+      if (rows.length > renderedRows.length) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 7;
+        td.textContent = `Showing first ${renderedRows.length} of ${rows.length} matching roles. Refine filters or export for the full result set.`;
+        tr.appendChild(td);
+        elements.roleRows.appendChild(tr);
+      }
     }
 
     function appendCell(row, value) {
@@ -588,8 +599,12 @@
 
     function firstScalar(input, paths) {
       for (const path of paths) {
+        const lengthSuffix = ".length";
+        if (path.endsWith(lengthSuffix)) {
+          const baseValue = getPath(input, path.slice(0, -lengthSuffix.length));
+          if (Array.isArray(baseValue)) return baseValue.length;
+        }
         const value = getPath(input, path);
-        if (path.endsWith(".length") && Array.isArray(getPath(input, path.slice(0, -7)))) return getPath(input, path.slice(0, -7)).length;
         if (value !== undefined && value !== null && typeof value !== "object") return value;
       }
       return "";
