@@ -25,6 +25,7 @@ ZIP_PATHS = [
     ROOT / "packages" / "dataverse-html-tools-suite" / "DataverseHTMLToolsSuite.zip",
     ROOT / "packages" / "dataverse-html-tools-suite" / "DataverseHTMLToolsSuite_managed.zip",
 ]
+ROOT_PARTS = {"solution.xml", "customizations.xml", "[Content_Types].xml"}
 
 
 def require(condition: bool, message: str, failures: list[str]) -> None:
@@ -101,6 +102,51 @@ def validate_source(failures: list[str]) -> str:
     return tenant_payload
 
 
+def validate_package_structure(package: Path, archive: zipfile.ZipFile, failures: list[str]) -> None:
+    """Dataverse rejects any archive that lacks the required root parts."""
+    names = set(archive.namelist())
+    for required in ROOT_PARTS:
+        require(required in names, f"{package.name} must contain {required} at the archive root", failures)
+
+    if "[Content_Types].xml" in names:
+        try:
+            content_types = ET.fromstring(archive.read("[Content_Types].xml").decode("utf-8-sig"))
+        except ET.ParseError as error:
+            failures.append(f"{package.name} has malformed [Content_Types].xml: {error}")
+        else:
+            namespace = "{http://schemas.openxmlformats.org/package/2006/content-types}"
+            defaults = {
+                element.get("Extension"): element.get("ContentType")
+                for element in content_types.findall(f"{namespace}Default")
+            }
+            overrides = {
+                (element.get("PartName") or "").lstrip("/")
+                for element in content_types.findall(f"{namespace}Override")
+            }
+            require(
+                defaults.get("xml") == "application/octet-stream",
+                f"{package.name} [Content_Types].xml must declare the xml default as application/octet-stream, "
+                "as produced by SolutionPackager",
+                failures,
+            )
+            for name in sorted(names - ROOT_PARTS):
+                extension = name.rsplit(".", 1)[1].lower() if "." in name.rsplit("/", 1)[-1] else ""
+                require(
+                    name in overrides or extension in defaults,
+                    f"{package.name} [Content_Types].xml does not declare a content type for {name}",
+                    failures,
+                )
+
+    if "solution.xml" in names:
+        solution = archive.read("solution.xml").decode("utf-8-sig")
+        expected_managed = "1" if package.stem.endswith("_managed") else "0"
+        require(
+            f"<Managed>{expected_managed}</Managed>" in solution,
+            f"{package.name} solution.xml must declare <Managed>{expected_managed}</Managed>",
+            failures,
+        )
+
+
 def validate_packages(failures: list[str], tenant_payload: str) -> None:
     if not tenant_payload:
         failures.append("Cannot validate packages: tenant web resource payload path is unknown")
@@ -109,7 +155,14 @@ def validate_packages(failures: list[str], tenant_payload: str) -> None:
         require(package.exists(), f"Missing package ZIP: {package}", failures)
         if not package.exists():
             continue
+        if not zipfile.is_zipfile(package):
+            failures.append(f"{package.name} is not a readable ZIP archive")
+            continue
         with zipfile.ZipFile(package) as archive:
+            if archive.testzip() is not None:
+                failures.append(f"{package.name} contains corrupted entries")
+                continue
+            validate_package_structure(package, archive, failures)
             names = set(archive.namelist())
             require(tenant_payload in names, f"{package.name} missing {tenant_payload}", failures)
             if "solution.xml" in names:
