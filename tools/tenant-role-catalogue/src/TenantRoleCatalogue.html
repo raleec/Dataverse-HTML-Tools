@@ -285,7 +285,7 @@
         const context = getGlobalContext();
         const orgUrl = context && context.getClientUrl ? context.getClientUrl() : "";
         const orgName = context && context.getOrgUniqueName ? context.getOrgUniqueName() : "Current environment";
-        const records = await retrieveAllRecords("role", "?$select=name,roleid,_businessunitid_value,ismanaged&$orderby=name asc");
+        const records = await retrieveAllRecords("role", "?$select=name,roleid,_businessunitid_value&$orderby=name asc");
         const environment = normalizeEnvironment({ displayName: orgName, environmentUrl: orgUrl, source: "Current Dataverse environment" });
         const rows = records.map((record) => normalizeRole(record, environment, "Current Dataverse environment"));
         replaceSourceRows("Current Dataverse environment", rows, [environment], []);
